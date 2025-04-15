@@ -48,6 +48,12 @@ export default createPlugin({
           propertyDescriptor?.set?.call(this, lowVolume);
         },
       });
+
+      const video = document.querySelector('video');
+      if (video) {
+        // eslint-disable-next-line no-self-assign
+        video.volume = video.volume;
+      }
     },
   },
 });
