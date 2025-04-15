@@ -1,6 +1,21 @@
 import { createPlugin } from '@/utils';
 import { t } from '@/i18n';
 
+// Manipulation exponent, higher value = lower volume
+// 3 is the value used by pulseaudio, which Barteks2x figured out this gist here: https://gist.github.com/Barteks2x/a4e189a36a10c159bb1644ffca21c02a
+// 0.05 (or 5%) is the lowest you can select in the UI which with an exponent of 3 becomes 0.000125 or 0.0125%
+const EXPONENT = 3;
+
+const initializeVolume = () => {
+  const video = document.querySelector('video');
+  if (video) {
+    video.volume = video.volume ** EXPONENT;
+    return true;
+  }
+
+  return false;
+};
+
 export default createPlugin({
   name: () => t('plugins.exponential-volume.name'),
   description: () => t('plugins.exponential-volume.description'),
@@ -13,10 +28,7 @@ export default createPlugin({
       // "YouTube Music fix volume ratio 0.4" by Marco Pfeiffer
       // https://greasyfork.org/en/scripts/397686-youtube-music-fix-volume-ratio/
 
-      // Manipulation exponent, higher value = lower volume
-      // 3 is the value used by pulseaudio, which Barteks2x figured out this gist here: https://gist.github.com/Barteks2x/a4e189a36a10c159bb1644ffca21c02a
-      // 0.05 (or 5%) is the lowest you can select in the UI which with an exponent of 3 becomes 0.000125 or 0.0125%
-      const EXPONENT = 3;
+      initializeVolume();
 
       const storedOriginalVolumes = new WeakMap<HTMLMediaElement, number>();
       const propertyDescriptor = Object.getOwnPropertyDescriptor(
@@ -48,12 +60,6 @@ export default createPlugin({
           propertyDescriptor?.set?.call(this, lowVolume);
         },
       });
-
-      const video = document.querySelector('video');
-      if (video) {
-        // eslint-disable-next-line no-self-assign
-        video.volume = video.volume;
-      }
     },
   },
 });
